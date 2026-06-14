@@ -1,0 +1,66 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install .NET MAUI Workloads
+        run: dotnet workload install android maui-windows
+
+      - name: Restore Dependencies
+        run: dotnet restore CrazyNumbers/CrazyNumbers.csproj
+
+      - name: Decrypt Android Keystore
+        shell: pwsh
+        run: |
+          $keystore_base64 = "${{ secrets.ANDROID_KEYSTORE_BASE64 }}"
+          if ([string]::IsNullOrEmpty($keystore_base64)) {
+              Write-Error "ANDROID_KEYSTORE_BASE64 secret is missing or empty!"
+              exit 1
+          }
+          $keystore_bytes = [System.Convert]::FromBase64String($keystore_base64)
+          # Ensure target directory exists
+          New-Item -ItemType Directory -Force -Path "CrazyNumbers/secrets"
+          # Write bytes to keystore file
+          [System.IO.File]::WriteAllBytes("CrazyNumbers/secrets/crazynumbers.keystore", $keystore_bytes)
+          Write-Host "Keystore successfully decrypted and written to CrazyNumbers/secrets/crazynumbers.keystore"
+
+      - name: Publish Android App (AAB & APK)
+        run: |
+          dotnet publish CrazyNumbers/CrazyNumbers.csproj -f net10.0-android -c Release -p:AndroidKeyStore=true -p:AndroidSigningKeyStore=secrets/crazynumbers.keystore -p:AndroidSigningKeyAlias="${{ secrets.ANDROID_KEY_ALIAS }}" -p:AndroidSigningKeyPass="${{ secrets.ANDROID_KEY_PASSWORD }}" -p:AndroidSigningStorePass="${{ secrets.ANDROID_KEYSTORE_PASSWORD }}"
+
+      - name: Publish Windows App
+        run: |
+          dotnet publish CrazyNumbers/CrazyNumbers.csproj -f net10.0-windows10.0.19041.0 -c Release
+
+      - name: Zip Windows App
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "CrazyNumbers/bin/Release/net10.0-windows10.0.19041.0/win-x64/publish/*" -DestinationPath "CrazyNumbers-Windows.zip" -Force
+
+      - name: Create GitHub Release and Upload Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            CrazyNumbers/bin/Release/net10.0-android/*-Signed.apk
+            CrazyNumbers/bin/Release/net10.0-android/*-Signed.aab
+            CrazyNumbers-Windows.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

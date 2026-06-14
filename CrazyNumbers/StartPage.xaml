@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:strings="clr-namespace:CrazyNumbers.Resources.Strings"
+             x:Class="CrazyNumbers.StartPage"
+             Shell.NavBarIsVisible="False"
+             Title="{x:Static strings:AppResources.GameTitle}">
+
+    <ContentPage.Background>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#0B0F19" Offset="0.0" />
+            <GradientStop Color="#16132A" Offset="1.0" />
+        </LinearGradientBrush>
+    </ContentPage.Background>
+
+    <Grid>
+        <ScrollView VerticalOptions="Center" HorizontalOptions="Center">
+            <VerticalStackLayout Spacing="30" Padding="30" HorizontalOptions="Center" VerticalOptions="Center" MaximumWidthRequest="600">
+                <!-- Game Logo / Title -->
+                <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                    <Label Text="{x:Static strings:AppResources.CrazyLabel}" 
+                           FontSize="54" 
+                           FontAttributes="Bold" 
+                           TextColor="#00e5ff" 
+                           HorizontalOptions="Center" 
+                           CharacterSpacing="4" />
+                    <Label Text="{x:Static strings:AppResources.NumbersLabel}" 
+                           FontSize="46" 
+                           FontAttributes="Bold" 
+                           TextColor="#ffd600" 
+                           HorizontalOptions="Center" 
+                           CharacterSpacing="2" />
+                </VerticalStackLayout>
+                
+                <!-- Description Card -->
+                <Border Stroke="#33ffffff" StrokeThickness="1" BackgroundColor="#15ffffff" Padding="25,20" StrokeShape="RoundRectangle 16" HorizontalOptions="Center" MaximumWidthRequest="450">
+                    <Label Text="{x:Static strings:AppResources.GameDescription}" 
+                           TextColor="#e0e0e0" 
+                           FontSize="15" 
+                           HorizontalTextAlignment="Center" 
+                           LineHeight="1.4" />
+                </Border>
+    
+                <!-- Buttons -->
+                <VerticalStackLayout Spacing="15" HorizontalOptions="Center" WidthRequest="240" Margin="0,20,0,0">
+                    <Button Text="{x:Static strings:AppResources.PlayGameButton}" 
+                            Clicked="OnPlayClicked" 
+                            BackgroundColor="#00e5ff" 
+                            TextColor="#0B0F19" 
+                            FontAttributes="Bold" 
+                            FontSize="18" 
+                            HeightRequest="55" 
+                            CornerRadius="27" />
+                    
+                    <Button Text="{x:Static strings:AppResources.HowToPlayButton}" 
+                            Clicked="OnRulesClicked" 
+                            BackgroundColor="Transparent" 
+                            TextColor="White" 
+                            BorderColor="#ffd600" 
+                            BorderWidth="2" 
+                            FontAttributes="Bold" 
+                            FontSize="16" 
+                            HeightRequest="55" 
+                            CornerRadius="27" />
+
+                    <Button Text="{x:Static strings:AppResources.AuthorButton}" 
+                            Clicked="OnAuthorClicked" 
+                            BackgroundColor="Transparent" 
+                            TextColor="White" 
+                            BorderColor="#00e5ff" 
+                            BorderWidth="2" 
+                            FontAttributes="Bold" 
+                            FontSize="16" 
+                            HeightRequest="55" 
+                            CornerRadius="27" />
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+    
+        <!-- Loading Overlay -->
+        <Grid x:Name="LoadingOverlay"
+              BackgroundColor="#CC0B0F19"
+              HorizontalOptions="Fill"
+              VerticalOptions="Fill"
+              IsVisible="False">
+            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="15">
+                <ActivityIndicator x:Name="Spinner" Color="#00e5ff" WidthRequest="60" HeightRequest="60" />
+            </VerticalStackLayout>
+        </Grid>
+    </Grid>
+</ContentPage>

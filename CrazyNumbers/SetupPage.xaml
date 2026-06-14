@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:strings="clr-namespace:CrazyNumbers.Resources.Strings"
+             x:Class="CrazyNumbers.SetupPage"
+             Shell.NavBarIsVisible="False"
+             Title="{x:Static strings:AppResources.GameSetupTitle}">
+
+    <ContentPage.Background>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#0B0F19" Offset="0.0" />
+            <GradientStop Color="#16132A" Offset="1.0" />
+        </LinearGradientBrush>
+    </ContentPage.Background>
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style x:Key="RoundButtonStyle" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="#15ffffff" />
+                <Setter Property="TextColor" Value="White" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="FontSize" Value="18" />
+                <Setter Property="HeightRequest" Value="60" />
+                <Setter Property="WidthRequest" Value="60" />
+                <Setter Property="CornerRadius" Value="30" />
+                <Setter Property="BorderColor" Value="#33ffffff" />
+                <Setter Property="BorderWidth" Value="1" />
+            </Style>
+
+            <Style x:Key="PlayerButtonStyle" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="#15ffffff" />
+                <Setter Property="TextColor" Value="White" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="HeightRequest" Value="50" />
+                <Setter Property="WidthRequest" Value="140" />
+                <Setter Property="CornerRadius" Value="25" />
+                <Setter Property="BorderColor" Value="#33ffffff" />
+                <Setter Property="BorderWidth" Value="1" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid>
+        <ScrollView VerticalOptions="Center" HorizontalOptions="Center">
+            <VerticalStackLayout Spacing="30" Padding="30" HorizontalOptions="Center" VerticalOptions="Center" MaximumWidthRequest="500">
+                <!-- Back Button and Title -->
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="15" VerticalOptions="Center">
+                    <Button Grid.Column="0" Text="←" Clicked="OnBackClicked" BackgroundColor="Transparent" TextColor="White" FontSize="24" FontAttributes="Bold" WidthRequest="50" HeightRequest="50" CornerRadius="25" />
+                    <Label Grid.Column="1" Text="{x:Static strings:AppResources.GameSetupTitle}" FontSize="28" FontAttributes="Bold" TextColor="White" VerticalOptions="Center" />
+                </Grid>
+    
+                <!-- Setup Content Card -->
+                <Border Stroke="#33ffffff" StrokeThickness="1" BackgroundColor="#15ffffff" Padding="25" StrokeShape="RoundRectangle 16">
+                    <VerticalStackLayout Spacing="20">
+                        <!-- Select Number of Players -->
+                        <Label Text="{x:Static strings:AppResources.SelectPlayersLabel}" FontSize="18" FontAttributes="Bold" TextColor="#ffd600" HorizontalOptions="Center" />
+                        <Grid x:Name="PlayersGrid" ColumnDefinitions="Auto,Auto" ColumnSpacing="20" HorizontalOptions="Center" Margin="0,5,0,10">
+                            <Button x:Name="TwoPlayersBtn" Grid.Column="0" Text="{x:Static strings:AppResources.TwoPlayersText}" Clicked="OnPlayerCountSelected" Style="{StaticResource PlayerButtonStyle}" />
+                            <Button x:Name="ThreePlayersBtn" Grid.Column="1" Text="{x:Static strings:AppResources.ThreePlayersText}" Clicked="OnPlayerCountSelected" Style="{StaticResource PlayerButtonStyle}" />
+                        </Grid>
+                        
+                        <BoxView HeightRequest="1" BackgroundColor="#22ffffff" Margin="0,5,0,10" />
+    
+                        <!-- Select Number of Rounds -->
+                        <Label Text="{x:Static strings:AppResources.SelectRoundsLabel}" FontSize="18" FontAttributes="Bold" TextColor="#ffd600" HorizontalOptions="Center" />
+                        <Label x:Name="RoundsDescriptionLbl" FontSize="14" TextColor="#b0b0b0" HorizontalTextAlignment="Center" />
+                        
+                        <!-- Buttons Grid -->
+                        <Grid x:Name="RoundsGrid" ColumnDefinitions="*,*,*,*" RowDefinitions="*,*" ColumnSpacing="12" RowSpacing="12" HorizontalOptions="Center" Margin="0,10,0,10">
+                            <Button Grid.Row="0" Grid.Column="0" Text="5" Clicked="OnRoundSelected" Style="{StaticResource RoundButtonStyle}" />
+                            <Button Grid.Row="0" Grid.Column="1" Text="6" Clicked="OnRoundSelected" Style="{StaticResource RoundButtonStyle}" />
+                            <Button Grid.Row="0" Grid.Column="2" Text="7" Clicked="OnRoundSelected" Style="{StaticResource RoundButtonStyle}" />
+                            <Button Grid.Row="0" Grid.Column="3" Text="8" Clicked="OnRoundSelected" Style="{StaticResource RoundButtonStyle}" />
+                            <Button Grid.Row="1" Grid.Column="0" Text="9" Clicked="OnRoundSelected" Style="{StaticResource RoundButtonStyle}" />
+                            <Button Grid.Row="1" Grid.Column="1" Text="10" Clicked="OnRoundSelected" Style="{StaticResource RoundButtonStyle}" />
+                            <Button Grid.Row="1" Grid.Column="2" Text="11" Clicked="OnRoundSelected" Style="{StaticResource RoundButtonStyle}" />
+                            <Button Grid.Row="1" Grid.Column="3" Text="12" Clicked="OnRoundSelected" Style="{StaticResource RoundButtonStyle}" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+    
+                <!-- Start Button -->
+                <Button Text="{x:Static strings:AppResources.StartGameButton}" 
+                        Clicked="OnStartClicked" 
+                        BackgroundColor="#00e5ff" 
+                        TextColor="#0B0F19" 
+                        FontAttributes="Bold" 
+                        FontSize="18" 
+                        HeightRequest="55" 
+                        CornerRadius="27"
+                        WidthRequest="240"
+                        HorizontalOptions="Center"
+                        Margin="0,10,0,0" />
+            </VerticalStackLayout>
+        </ScrollView>
+    
+        <!-- Loading Overlay -->
+        <Grid x:Name="LoadingOverlay"
+              BackgroundColor="#CC0B0F19"
+              HorizontalOptions="Fill"
+              VerticalOptions="Fill"
+              IsVisible="False">
+            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="15">
+                <ActivityIndicator x:Name="Spinner" Color="#00e5ff" WidthRequest="60" HeightRequest="60" />
+            </VerticalStackLayout>
+        </Grid>
+    </Grid>
+</ContentPage>

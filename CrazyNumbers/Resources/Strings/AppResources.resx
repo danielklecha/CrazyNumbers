@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="0" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  
+  <data name="GameTitle" xml:space="preserve">
+    <value>Crazy Numbers</value>
+  </data>
+  <data name="CrazyLabel" xml:space="preserve">
+    <value>CRAZY</value>
+  </data>
+  <data name="NumbersLabel" xml:space="preserve">
+    <value>NUMBERS</value>
+  </data>
+  <data name="GameDescription" xml:space="preserve">
+    <value>A thrilling mathematical game of adjacency, calculation, and tactical grid occupation. Take turns to multiply and claim your territory!</value>
+  </data>
+  <data name="PlayGameButton" xml:space="preserve">
+    <value>PLAY GAME</value>
+  </data>
+  <data name="HowToPlayButton" xml:space="preserve">
+    <value>HOW TO PLAY</value>
+  </data>
+  <data name="GameSetupTitle" xml:space="preserve">
+    <value>GAME SETUP</value>
+  </data>
+  <data name="SelectPlayersLabel" xml:space="preserve">
+    <value>Select Number of Players</value>
+  </data>
+  <data name="TwoPlayersText" xml:space="preserve">
+    <value>2 Players</value>
+  </data>
+  <data name="ThreePlayersText" xml:space="preserve">
+    <value>3 Players</value>
+  </data>
+  <data name="SelectRoundsLabel" xml:space="preserve">
+    <value>Select Number of Rounds</value>
+  </data>
+  <data name="RoundsDescriptionTemplate" xml:space="preserve">
+    <value>Each round consists of {0} player turns. The total turns in a game will be {0} times the number of rounds.</value>
+  </data>
+  <data name="StartGameButton" xml:space="preserve">
+    <value>START GAME</value>
+  </data>
+  <data name="RulesTitle" xml:space="preserve">
+    <value>GAME RULES</value>
+  </data>
+  <data name="RulesSubtitle" xml:space="preserve">
+    <value>Crazy Numbers: Zigzag</value>
+  </data>
+  <data name="RulesPlayersRule" xml:space="preserve">
+    <value>• A 2 or 3-Player Turn-Based Game</value>
+  </data>
+  <data name="RulesPlayersDescription" xml:space="preserve">
+    <value>Players take turns making calculations to occupy cells on the 6x6 grid. The goal is to obtain the highest score by tactical positioning.</value>
+  </data>
+  <data name="RulesScoringTitle" xml:space="preserve">
+    <value>• Scoring Rules</value>
+  </data>
+  <data name="RulesScoringDescription" xml:space="preserve">
+    <value>- Diagonals: Occupying two fields diagonally scores 20 points.
+- Triplets: Occupying three consecutive fields horizontally or vertically scores a one-time 30-point bonus.</value>
+  </data>
+  <data name="RulesHowToPlayTitle" xml:space="preserve">
+    <value>• How to Play</value>
+  </data>
+  <data name="RulesHowToPlayDescription" xml:space="preserve">
+    <value>1. The game displays the first factor (the player's active color).
+2. Select a second factor from the multiplier panel (numbers 1-9) at the bottom.
+3. Calculate the product (Factor 1 × Factor 2) and locate it on the board.
+4. Tap the cell with the correct product to claim it!
+5. Note: Tapping a wrong cell or a cell that is already taken passes your turn.</value>
+  </data>
+  <data name="GotItButton" xml:space="preserve">
+    <value>GOT IT</value>
+  </data>
+  <data name="PlayerHeaderTemplate" xml:space="preserve">
+    <value>PLAYER {0}</value>
+  </data>
+  <data name="RoundLabel" xml:space="preserve">
+    <value>ROUND</value>
+  </data>
+  <data name="TipSelectMultiplier" xml:space="preserve">
+    <value>Select a multiplier from the bottom panel.</value>
+  </data>
+  <data name="TipSelectProduct" xml:space="preserve">
+    <value>Select the product on the grid.</value>
+  </data>
+  <data name="RulesButton" xml:space="preserve">
+    <value>RULES</value>
+  </data>
+  <data name="ResetButton" xml:space="preserve">
+    <value>RESET</value>
+  </data>
+  <data name="ResetAlertTitle" xml:space="preserve">
+    <value>Reset Game</value>
+  </data>
+  <data name="ResetAlertMessage" xml:space="preserve">
+    <value>Are you sure you want to reset the game and return to the main screen?</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="Oops" xml:space="preserve">
+    <value>Oops</value>
+  </data>
+  <data name="CellAlreadyTakenMessage" xml:space="preserve">
+    <value>Correct answer, but the selected field is already taken!</value>
+  </data>
+  <data name="WrongAnswerMessage" xml:space="preserve">
+    <value>Unfortunately, that's the wrong answer!</value>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="GameOverTitle" xml:space="preserve">
+    <value>GAME OVER!</value>
+  </data>
+  <data name="WinnerLabel" xml:space="preserve">
+    <value>WINNER</value>
+  </data>
+  <data name="WinnersLabel" xml:space="preserve">
+    <value>WINNERS</value>
+  </data>
+  <data name="NewGameButton" xml:space="preserve">
+    <value>NEW GAME</value>
+  </data>
+  <data name="Pts" xml:space="preserve">
+    <value>pts</value>
+  </data>
+  <data name="ExitAlertTitle" xml:space="preserve">
+    <value>Exit Game</value>
+  </data>
+  <data name="ExitAlertMessage" xml:space="preserve">
+    <value>Are you sure you want to leave the game? Your progress will be lost.</value>
+  </data>
+  <data name="AuthorButton" xml:space="preserve">
+    <value>AUTHOR</value>
+  </data>
+  <data name="AuthorAlertTitle" xml:space="preserve">
+    <value>Author</value>
+  </data>
+  <data name="AuthorAlertMessage" xml:space="preserve">
+    <value>Daniel Klecha</value>
+  </data>
+</root>

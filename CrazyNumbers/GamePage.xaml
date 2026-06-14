@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:strings="clr-namespace:CrazyNumbers.Resources.Strings"
+             x:Class="CrazyNumbers.GamePage"
+             Shell.NavBarIsVisible="False"
+             Title="{x:Static strings:AppResources.GameTitle}">
+
+    <ContentPage.Background>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#0B0F19" Offset="0.0" />
+            <GradientStop Color="#16132A" Offset="1.0" />
+        </LinearGradientBrush>
+    </ContentPage.Background>
+
+    <Grid Padding="15">
+        <!-- Main Game Layout -->
+        <Grid RowDefinitions="Auto,*,Auto,Auto,Auto" RowSpacing="15">
+            <!-- Top Panel: Players + Round -->
+            <Grid Grid.Row="0" x:Name="TopPanelGrid" ColumnDefinitions="*,*,*,*" ColumnSpacing="10" HorizontalOptions="Fill">
+                <!-- Player 1 Column -->
+                <Border Grid.Column="0" x:Name="Player1ColBorder" BackgroundColor="#15ffffff" StrokeShape="RoundRectangle 12" Padding="8" StrokeThickness="2" Stroke="Transparent">
+                    <VerticalStackLayout Spacing="4">
+                        <Label x:Name="Player1Header" Text="PLAYER 1" FontSize="12" FontAttributes="Bold" CharacterSpacing="1" HorizontalOptions="Center"/>
+                        <Label x:Name="Score1Lbl" Text="0" FontSize="22" FontAttributes="Bold" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Player 2 Column -->
+                <Border Grid.Column="1" x:Name="Player2ColBorder" BackgroundColor="#15ffffff" StrokeShape="RoundRectangle 12" Padding="8" StrokeThickness="2" Stroke="Transparent">
+                    <VerticalStackLayout Spacing="4">
+                        <Label x:Name="Player2Header" Text="PLAYER 2" FontSize="12" FontAttributes="Bold" CharacterSpacing="1" HorizontalOptions="Center"/>
+                        <Label x:Name="Score2Lbl" Text="0" FontSize="22" FontAttributes="Bold" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Player 3 Column -->
+                <Border Grid.Column="2" x:Name="Player3ColBorder" BackgroundColor="#15ffffff" StrokeShape="RoundRectangle 12" Padding="8" StrokeThickness="2" Stroke="Transparent">
+                    <VerticalStackLayout Spacing="4">
+                        <Label x:Name="Player3Header" Text="PLAYER 3" FontSize="12" FontAttributes="Bold" CharacterSpacing="1" HorizontalOptions="Center"/>
+                        <Label x:Name="Score3Lbl" Text="0" FontSize="22" FontAttributes="Bold" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Round Column -->
+                <Border Grid.Column="3" x:Name="RoundColBorder" BackgroundColor="#15ffffff" StrokeShape="RoundRectangle 12" Padding="8" StrokeThickness="1" Stroke="#33ffffff">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{x:Static strings:AppResources.RoundLabel}" FontSize="12" FontAttributes="Bold" CharacterSpacing="1" TextColor="#b0b0b0" HorizontalOptions="Center"/>
+                        <Label x:Name="RoundLbl" Text="1/5" FontSize="22" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+
+            <!-- Main Board -->
+            <Grid Grid.Row="1" x:Name="BoardContainer" HorizontalOptions="Fill" VerticalOptions="Fill" SizeChanged="OnBoardContainerSizeChanged">
+                <Border x:Name="BoardBorder" BackgroundColor="#10ffffff" Stroke="#20ffffff" StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="15" HorizontalOptions="Center" VerticalOptions="Center">
+                    <Grid x:Name="BoardGrid"
+                          RowDefinitions="*,*,*,*,*,*"
+                          ColumnDefinitions="*,*,*,*,*,*"
+                          ColumnSpacing="6" RowSpacing="6"
+                          HorizontalOptions="Fill" VerticalOptions="Fill">
+                        <!-- Generated dynamically in code-behind -->
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Calculation & Tip Panel -->
+            <VerticalStackLayout Grid.Row="2" Spacing="15" HorizontalOptions="Center">
+                <HorizontalStackLayout HorizontalOptions="Center" Spacing="15" VerticalOptions="Center">
+                    <!-- Factor 1 Tile -->
+                    <Border x:Name="Factor1Border" BackgroundColor="#00e5ff" StrokeShape="RoundRectangle 10" Padding="0" WidthRequest="46" HeightRequest="46" StrokeThickness="0">
+                        <Label x:Name="Factor1Lbl" Text="5" HorizontalOptions="Center" VerticalOptions="Center" TextColor="#0B0F19" FontSize="20" FontAttributes="Bold" />
+                    </Border>
+                    
+                    <Label Text="×" TextColor="White" VerticalOptions="Center" FontSize="24" FontAttributes="Bold" />
+                    
+                    <!-- Factor 2 Tile -->
+                    <Border x:Name="Factor2Border" BackgroundColor="Transparent" Stroke="#33ffffff" StrokeThickness="2" StrokeShape="RoundRectangle 10" Padding="0" WidthRequest="46" HeightRequest="46">
+                        <Label x:Name="Factor2Lbl" Text="?" HorizontalOptions="Center" VerticalOptions="Center" TextColor="White" FontSize="20" FontAttributes="Bold" />
+                    </Border>
+                </HorizontalStackLayout>
+                <Label x:Name="TipLbl" Text="{x:Static strings:AppResources.TipSelectMultiplier}" HorizontalOptions="Center" FontSize="16" FontAttributes="Italic" TextColor="#a0a0a0" HeightRequest="20" />
+            </VerticalStackLayout>
+
+            <!-- Bottom Panel: Factors to choose from -->
+            <FlexLayout Grid.Row="3" x:Name="FactorsGrid" Wrap="Wrap" JustifyContent="Center" AlignItems="Center" Margin="0">
+                <!-- Generated dynamically in code-behind -->
+            </FlexLayout>
+
+            <!-- Action Buttons -->
+            <HorizontalStackLayout Grid.Row="4" HorizontalOptions="Center" Spacing="20" Margin="0,5">
+                <Button Text="{x:Static strings:AppResources.RulesButton}" Clicked="OnRulesClicked" BackgroundColor="Transparent" BorderColor="#ffd600" BorderWidth="2" TextColor="White" HeightRequest="45" WidthRequest="110" FontAttributes="Bold" CornerRadius="22" />
+                <Button Text="{x:Static strings:AppResources.ResetButton}" Clicked="OnResetClicked" BackgroundColor="#ff1744" TextColor="White" HeightRequest="45" WidthRequest="110" FontAttributes="Bold" CornerRadius="22" />
+            </HorizontalStackLayout>
+        </Grid>
+
+        <!-- Game Over Overlay -->
+        <Border x:Name="GameOverOverlay" IsVisible="False" BackgroundColor="#f00B0F19" StrokeThickness="0" Grid.RowSpan="5" Padding="30">
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="25" MaximumWidthRequest="400">
+                <Label Text="{x:Static strings:AppResources.GameOverTitle}" FontSize="36" FontAttributes="Bold" TextColor="#ffd600" HorizontalOptions="Center" CharacterSpacing="2" />
+                
+                <Border Stroke="#33ffffff" StrokeThickness="1" BackgroundColor="#15ffffff" Padding="20" StrokeShape="RoundRectangle 16">
+                    <VerticalStackLayout x:Name="WinnersContainer" Spacing="15" HorizontalOptions="Center" />
+                </Border>
+
+                <Button Text="{x:Static strings:AppResources.NewGameButton}" Clicked="OnNewGameClicked" BackgroundColor="#00e5ff" TextColor="#0B0F19" FontAttributes="Bold" FontSize="18" HeightRequest="55" CornerRadius="27" WidthRequest="200" HorizontalOptions="Center" />
+            </VerticalStackLayout>
+        </Border>
+    
+        <!-- Loading Overlay -->
+        <Grid x:Name="LoadingOverlay"
+              BackgroundColor="#CC0B0F19"
+              HorizontalOptions="Fill"
+              VerticalOptions="Fill"
+              IsVisible="False"
+              Grid.RowSpan="5">
+            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="15">
+                <ActivityIndicator x:Name="Spinner" Color="#00e5ff" WidthRequest="60" HeightRequest="60" />
+            </VerticalStackLayout>
+        </Grid>
+    </Grid>
+</ContentPage>
