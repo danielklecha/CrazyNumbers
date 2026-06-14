@@ -50,7 +50,7 @@ jobs:
 
       - name: Publish Windows App
         run: |
-          dotnet publish CrazyNumbers/CrazyNumbers.csproj -f net10.0-windows10.0.19041.0 -c Release -r win-x64
+          dotnet publish CrazyNumbers/CrazyNumbers.csproj -f net10.0-windows10.0.19041.0 -c Release -r win-x64 -p:UseMonoRuntime=false
 
       - name: Zip Windows App
         shell: pwsh
