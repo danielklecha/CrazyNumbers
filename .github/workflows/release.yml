@@ -3,10 +3,12 @@ name: Build and Release
 on:
   push:
     tags:
-      - 'v*'
+      - 'v[0-9]*'
 
 permissions:
   contents: write
+  id-token: write
+  actions: read
 
 jobs:
   build-and-release:
@@ -37,30 +39,28 @@ jobs:
           }
           $keystore_bytes = [System.Convert]::FromBase64String($keystore_base64)
           # Ensure target directory exists
-          New-Item -ItemType Directory -Force -Path "CrazyNumbers/secrets"
+          New-Item -ItemType Directory -Force -Path "secrets"
           # Write bytes to keystore file
-          [System.IO.File]::WriteAllBytes("CrazyNumbers/secrets/crazynumbers.keystore", $keystore_bytes)
-          Write-Host "Keystore successfully decrypted and written to CrazyNumbers/secrets/crazynumbers.keystore"
+          [System.IO.File]::WriteAllBytes("secrets/crazynumbers.keystore", $keystore_bytes)
+          Write-Host "Keystore successfully decrypted and written to secrets/crazynumbers.keystore"
 
       - name: Publish Android App (AAB & APK)
         run: |
-          dotnet publish CrazyNumbers/CrazyNumbers.csproj -f net10.0-android -c Release -p:AndroidKeyStore=true -p:AndroidSigningKeyStore=secrets/crazynumbers.keystore -p:AndroidSigningKeyAlias="${{ secrets.ANDROID_KEY_ALIAS }}" -p:AndroidSigningKeyPass="${{ secrets.ANDROID_KEY_PASSWORD }}" -p:AndroidSigningStorePass="${{ secrets.ANDROID_KEYSTORE_PASSWORD }}"
+          dotnet publish CrazyNumbers/CrazyNumbers.csproj -f net10.0-android -c Release -p:AndroidKeyStore=true -p:AndroidSigningKeyStore=../secrets/crazynumbers.keystore -p:AndroidSigningKeyAlias="${{ secrets.ANDROID_KEY_ALIAS }}" -p:AndroidSigningKeyPass="${{ secrets.ANDROID_KEY_PASSWORD }}" -p:AndroidSigningStorePass="${{ secrets.ANDROID_KEYSTORE_PASSWORD }}"
 
       - name: Publish Windows App
         run: |
-          dotnet publish CrazyNumbers/CrazyNumbers.csproj -f net10.0-windows10.0.19041.0 -c Release
+          dotnet publish CrazyNumbers/CrazyNumbers.csproj -f net10.0-windows10.0.19041.0 -c Release -r win-x64
 
       - name: Zip Windows App
         shell: pwsh
         run: |
           Compress-Archive -Path "CrazyNumbers/bin/Release/net10.0-windows10.0.19041.0/win-x64/publish/*" -DestinationPath "CrazyNumbers-Windows.zip" -Force
 
-      - name: Create GitHub Release and Upload Assets
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            CrazyNumbers/bin/Release/net10.0-android/*-Signed.apk
-            CrazyNumbers/bin/Release/net10.0-android/*-Signed.aab
-            CrazyNumbers-Windows.zip
+      - name: Create GitHub Release
+        shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="${{ github.ref_name }}"
+          gh release create "$tag" CrazyNumbers/bin/Release/net10.0-android/*-Signed.apk CrazyNumbers/bin/Release/net10.0-android/*-Signed.aab CrazyNumbers-Windows.zip --generate-notes
