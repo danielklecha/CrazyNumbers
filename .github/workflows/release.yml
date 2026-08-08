@@ -57,10 +57,23 @@ jobs:
         run: |
           Compress-Archive -Path "CrazyNumbers/bin/Release/net10.0-windows10.0.19041.0/win-x64/publish/*" -DestinationPath "CrazyNumbers-Windows.zip" -Force
 
+      - name: Zip Android Native Symbols
+        shell: pwsh
+        run: |
+          $symbolsPath = "CrazyNumbers/obj/Release/net10.0-android/app_shared_libraries"
+          if (Test-Path $symbolsPath) {
+              # Compress the ABI-specific subdirectories directly
+              Compress-Archive -Path "$symbolsPath/*" -DestinationPath "CrazyNumbers-Android-Symbols.zip" -Force
+              Write-Host "Android native symbols successfully zipped."
+          } else {
+              Write-Error "Android native symbols directory not found at $symbolsPath!"
+              exit 1
+          }
+
       - name: Create GitHub Release
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           tag="${{ github.ref_name }}"
-          gh release create "$tag" CrazyNumbers/bin/Release/net10.0-android/*-Signed.apk CrazyNumbers/bin/Release/net10.0-android/*-Signed.aab CrazyNumbers-Windows.zip --generate-notes
+          gh release create "$tag" CrazyNumbers/bin/Release/net10.0-android/*-Signed.apk CrazyNumbers/bin/Release/net10.0-android/*-Signed.aab CrazyNumbers-Windows.zip CrazyNumbers-Android-Symbols.zip --generate-notes
