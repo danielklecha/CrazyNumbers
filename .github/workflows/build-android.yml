@@ -1,30 +1,30 @@
-name: Build and Release
+name: Build Android
 
 on:
-  push:
-    tags:
-      - 'v[0-9]*'
-
-permissions:
-  contents: write
-  id-token: write
-  actions: read
+  workflow_call:
+  workflow_dispatch:
 
 jobs:
-  build-and-release:
-    runs-on: windows-latest
-    
+  build-android:
+    runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Source Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
-      - name: Install .NET MAUI Workloads
-        run: dotnet workload install android maui-windows
+      - name: Install .NET Android Workload
+        run: dotnet workload install android
 
       - name: Restore Dependencies
         run: dotnet restore CrazyNumbers/CrazyNumbers.csproj
@@ -38,9 +38,7 @@ jobs:
               exit 1
           }
           $keystore_bytes = [System.Convert]::FromBase64String($keystore_base64)
-          # Ensure target directory exists
           New-Item -ItemType Directory -Force -Path "secrets"
-          # Write bytes to keystore file
           [System.IO.File]::WriteAllBytes("secrets/crazynumbers.keystore", $keystore_bytes)
           Write-Host "Keystore successfully decrypted and written to secrets/crazynumbers.keystore"
 
@@ -48,21 +46,11 @@ jobs:
         run: |
           dotnet publish CrazyNumbers/CrazyNumbers.csproj -f net10.0-android -c Release -p:AndroidKeyStore=true -p:AndroidSigningKeyStore=../secrets/crazynumbers.keystore -p:AndroidSigningKeyAlias="${{ secrets.ANDROID_KEY_ALIAS }}" -p:AndroidSigningKeyPass="${{ secrets.ANDROID_KEY_PASSWORD }}" -p:AndroidSigningStorePass="${{ secrets.ANDROID_KEYSTORE_PASSWORD }}"
 
-      - name: Publish Windows App
-        run: |
-          dotnet publish CrazyNumbers/CrazyNumbers.csproj -f net10.0-windows10.0.19041.0 -c Release -r win-x64 -p:UseMonoRuntime=false
-
-      - name: Zip Windows App
-        shell: pwsh
-        run: |
-          Compress-Archive -Path "CrazyNumbers/bin/Release/net10.0-windows10.0.19041.0/win-x64/publish/*" -DestinationPath "CrazyNumbers-Windows.zip" -Force
-
       - name: Zip Android Native Symbols
         shell: pwsh
         run: |
           $symbolsPath = "CrazyNumbers/obj/Release/net10.0-android/app_shared_libraries"
           if (Test-Path $symbolsPath) {
-              # Compress the ABI-specific subdirectories directly
               Compress-Archive -Path "$symbolsPath/*" -DestinationPath "CrazyNumbers-Android-Symbols.zip" -Force
               Write-Host "Android native symbols successfully zipped."
           } else {
@@ -70,10 +58,15 @@ jobs:
               exit 1
           }
 
-      - name: Create GitHub Release
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Prepare Android Artifacts
         run: |
-          tag="${{ github.ref_name }}"
-          gh release create "$tag" CrazyNumbers/bin/Release/net10.0-android/*-Signed.apk CrazyNumbers/bin/Release/net10.0-android/*-Signed.aab CrazyNumbers-Windows.zip CrazyNumbers-Android-Symbols.zip --generate-notes
+          mkdir -p android-artifacts
+          cp CrazyNumbers/bin/Release/net10.0-android/*-Signed.apk android-artifacts/
+          cp CrazyNumbers/bin/Release/net10.0-android/*-Signed.aab android-artifacts/
+          cp CrazyNumbers-Android-Symbols.zip android-artifacts/
+
+      - name: Upload Android Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-assets
+          path: android-artifacts/*

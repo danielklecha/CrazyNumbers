@@ -1,0 +1,45 @@
+name: Build Windows
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v6
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install .NET MAUI Workloads
+        run: dotnet workload restore CrazyNumbers/CrazyNumbers.csproj
+
+      - name: Restore Dependencies
+        run: dotnet restore CrazyNumbers/CrazyNumbers.csproj
+
+      - name: Publish Windows App
+        run: |
+          dotnet publish CrazyNumbers/CrazyNumbers.csproj -f net10.0-windows10.0.19041.0 -c Release -r win-x64 -p:UseMonoRuntime=false
+
+      - name: Zip Windows App
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "CrazyNumbers/bin/Release/net10.0-windows10.0.19041.0/win-x64/publish/*" -DestinationPath "CrazyNumbers-Windows.zip" -Force
+
+      - name: Prepare Windows Artifacts
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path windows-artifacts
+          Copy-Item CrazyNumbers-Windows.zip -Destination windows-artifacts/
+
+      - name: Upload Windows Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-assets
+          path: windows-artifacts/*
