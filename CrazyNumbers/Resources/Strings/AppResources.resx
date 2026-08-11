@@ -83,11 +83,20 @@
   <data name="SelectPlayersLabel" xml:space="preserve">
     <value>Select Number of Players</value>
   </data>
+  <data name="OnePlayerText" xml:space="preserve">
+    <value>1 Player</value>
+  </data>
   <data name="TwoPlayersText" xml:space="preserve">
     <value>2 Players</value>
   </data>
   <data name="ThreePlayersText" xml:space="preserve">
     <value>3 Players</value>
+  </data>
+  <data name="CpuText" xml:space="preserve">
+    <value>CPU</value>
+  </data>
+  <data name="CpuTurnTip" xml:space="preserve">
+    <value>CPU is making a move...</value>
   </data>
   <data name="SelectRoundsLabel" xml:space="preserve">
     <value>Select Number of Rounds</value>
@@ -105,10 +114,10 @@
     <value>Crazy Numbers: Zigzag</value>
   </data>
   <data name="RulesPlayersRule" xml:space="preserve">
-    <value>• A 2 or 3-Player Turn-Based Game</value>
+    <value>• A 1, 2, or 3-Player Turn-Based Game</value>
   </data>
   <data name="RulesPlayersDescription" xml:space="preserve">
-    <value>Players take turns making calculations to occupy cells on the 6x6 grid. The goal is to obtain the highest score by tactical positioning.</value>
+    <value>Play solo against the CPU or with friends in 2 or 3-player mode. Players take turns making calculations to occupy cells on the 6x6 grid. The goal is to obtain the highest score by tactical positioning.</value>
   </data>
   <data name="RulesScoringTitle" xml:space="preserve">
     <value>• Scoring Rules</value>
@@ -201,5 +210,17 @@
   </data>
   <data name="AuthorAlertMessage" xml:space="preserve">
     <value>Daniel Klecha</value>
+  </data>
+  <data name="SelectCpuDifficultyLabel" xml:space="preserve">
+    <value>Select CPU Difficulty</value>
+  </data>
+  <data name="CpuDifficultyEasy" xml:space="preserve">
+    <value>Easy</value>
+  </data>
+  <data name="CpuDifficultyMedium" xml:space="preserve">
+    <value>Medium</value>
+  </data>
+  <data name="CpuDifficultyHard" xml:space="preserve">
+    <value>Hard</value>
   </data>
 </root>

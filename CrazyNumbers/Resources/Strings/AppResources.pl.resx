@@ -83,11 +83,20 @@
   <data name="SelectPlayersLabel" xml:space="preserve">
     <value>Wybierz liczbę graczy</value>
   </data>
+  <data name="OnePlayerText" xml:space="preserve">
+    <value>1 gracz</value>
+  </data>
   <data name="TwoPlayersText" xml:space="preserve">
     <value>2 graczy</value>
   </data>
   <data name="ThreePlayersText" xml:space="preserve">
     <value>3 graczy</value>
+  </data>
+  <data name="CpuText" xml:space="preserve">
+    <value>CPU</value>
+  </data>
+  <data name="CpuTurnTip" xml:space="preserve">
+    <value>CPU wykonuje ruch...</value>
   </data>
   <data name="SelectRoundsLabel" xml:space="preserve">
     <value>Wybierz liczbę rund</value>
@@ -105,10 +114,10 @@
     <value>Szalone Liczby: Zygzak</value>
   </data>
   <data name="RulesPlayersRule" xml:space="preserve">
-    <value>• Gra turowa dla 2 lub 3 graczy</value>
+    <value>• Gra turowa dla 1, 2 lub 3 graczy</value>
   </data>
   <data name="RulesPlayersDescription" xml:space="preserve">
-    <value>Gracze na zmianę wykonują obliczenia, aby zająć pola na siatce 6x6. Celem jest zdobycie jak najwyższego wyniku poprzez taktyczne pozycjonowanie.</value>
+    <value>Graj jednoosobowo przeciwko CPU lub ze znajomymi w trybie dla 2 lub 3 graczy. Gracze na zmianę wykonują obliczenia, aby zająć pola na siatce 6x6. Celem jest zdobycie jak najwyższego wyniku poprzez taktyczne pozycjonowanie.</value>
   </data>
   <data name="RulesScoringTitle" xml:space="preserve">
     <value>• Zasady punktacji</value>
@@ -201,5 +210,17 @@
   </data>
   <data name="AuthorAlertMessage" xml:space="preserve">
     <value>Daniel Klecha</value>
+  </data>
+  <data name="SelectCpuDifficultyLabel" xml:space="preserve">
+    <value>Wybierz poziom trudności CPU</value>
+  </data>
+  <data name="CpuDifficultyEasy" xml:space="preserve">
+    <value>Łatwy</value>
+  </data>
+  <data name="CpuDifficultyMedium" xml:space="preserve">
+    <value>Średni</value>
+  </data>
+  <data name="CpuDifficultyHard" xml:space="preserve">
+    <value>Trudny</value>
   </data>
 </root>

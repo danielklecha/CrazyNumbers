@@ -11,6 +11,9 @@ namespace CrazyNumbers
     {
         private readonly int _rounds;
         private readonly int _players;
+        private readonly bool _isVsCpu;
+        private readonly CpuDifficulty _cpuDifficulty;
+        private bool _isCpuTurnRunning = false;
         
         private readonly int[] p = new int[] {
             1, 2, 3, 4, 5, 6,
@@ -34,11 +37,13 @@ namespace CrazyNumbers
         private readonly Color Player2Color = Color.FromArgb("#ffd600"); // Yellow/Gold
         private readonly Color Player3Color = Color.FromArgb("#ff1744"); // Bright Rose Red
 
-        public GamePage(int rounds, int players = 3)
+        public GamePage(int rounds, int players = 3, bool isVsCpu = false, CpuDifficulty cpuDifficulty = CpuDifficulty.Medium)
         {
             InitializeComponent();
             _rounds = rounds;
             _players = players;
+            _isVsCpu = isVsCpu;
+            _cpuDifficulty = cpuDifficulty;
             
             ConfigurePlayerLayout();
             GenerateBoard();
@@ -264,6 +269,17 @@ namespace CrazyNumbers
             UpdateUI();
         }
 
+        private string GetCpuName()
+        {
+            string diffStr = _cpuDifficulty switch
+            {
+                CpuDifficulty.Easy => AppResources.CpuDifficultyEasy,
+                CpuDifficulty.Hard => AppResources.CpuDifficultyHard,
+                _ => AppResources.CpuDifficultyMedium
+            };
+            return $"{AppResources.CpuText} ({diffStr})";
+        }
+
         private void UpdateUI()
         {
             Score1Lbl.Text = scores[1].ToString();
@@ -281,7 +297,7 @@ namespace CrazyNumbers
             Player1ColBorder.BackgroundColor = currentPlayer == 1 ? Color.FromArgb("#2500e5ff") : Color.FromArgb("#15ffffff");
 
             // Player 2 styling/active indicator
-            Player2Header.Text = string.Format(AppResources.PlayerHeaderTemplate, 2);
+            Player2Header.Text = _isVsCpu ? GetCpuName() : string.Format(AppResources.PlayerHeaderTemplate, 2);
             Player2Header.TextColor = Player2Color;
             Score2Lbl.TextColor = Player2Color;
             Player2ColBorder.Stroke = currentPlayer == 2 ? Player2Color : Colors.Transparent;
@@ -366,11 +382,26 @@ namespace CrazyNumbers
             }
         }
 
+        private async Task AnimateCellCapture(int cellIndex)
+        {
+            if (cellIndex < 0 || cellIndex >= BoardGrid.Children.Count) return;
+            if (BoardGrid.Children[cellIndex] is Border cellBorder)
+            {
+                cellBorder.AnchorX = 0.5;
+                cellBorder.AnchorY = 0.5;
+                await cellBorder.ScaleTo(1.25, 140, Easing.CubicOut);
+                await cellBorder.ScaleTo(1.0, 140, Easing.CubicIn);
+            }
+        }
+
         private void OnFactorTapped(object sender, EventArgs e)
         {
+            if (_isCpuTurnRunning || (_isVsCpu && currentPlayer == 2)) return;
             if (number2 != 0) return; // already selected
 
             var border = (Border)sender;
+            _ = border.ScaleTo(1.2, 100, Easing.CubicOut).ContinueWith(t => border.ScaleTo(1.0, 100, Easing.CubicIn));
+
             int factor = (int)border.BindingContext;
             number2 = factor;
             UpdateUI();
@@ -378,6 +409,7 @@ namespace CrazyNumbers
 
         private async void OnGridCellTapped(object sender, EventArgs e)
         {
+            if (_isCpuTurnRunning || (_isVsCpu && currentPlayer == 2)) return;
             if (number2 == 0) return; // factor 2 not selected yet
 
             var border = (Border)sender;
@@ -389,85 +421,20 @@ namespace CrazyNumbers
                 {
                     z[x] = currentPlayer;
 
-                    // points (diagonals logic translated)
-                    if ((x > 6 && x < 11) || (x > 12 && x < 17) || (x > 18 && x < 23) || (x > 24 && x < 29)) // center
-                    {
-                        if (z[x] == z[x - 7]) scores[currentPlayer] += 20;
-                        if (z[x] == z[x + 7]) scores[currentPlayer] += 20;
-                        if (z[x] == z[x - 5]) scores[currentPlayer] += 20;
-                        if (z[x] == z[x + 5]) scores[currentPlayer] += 20;
-                    }
-                    else if (x == 6 || x == 12 || x == 18 || x == 24) // left
-                    {
-                        if (z[x] == z[x + 7]) scores[currentPlayer] += 20;
-                        if (z[x] == z[x - 5]) scores[currentPlayer] += 20;
-                    }
-                    else if (x == 11 || x == 17 || x == 23 || x == 29) // right
-                    {
-                        if (z[x] == z[x - 7]) scores[currentPlayer] += 20;
-                        if (z[x] == z[x + 5]) scores[currentPlayer] += 20;
-                    }
-                    else if (x == 1 || x == 2 || x == 3 || x == 4) // top
-                    {
-                        if (z[x] == z[x + 7]) scores[currentPlayer] += 20;
-                        if (z[x] == z[x + 5]) scores[currentPlayer] += 20;
-                    }
-                    else if (x == 31 || x == 32 || x == 33 || x == 34) // bottom
-                    {
-                        if (z[x] == z[x - 7]) scores[currentPlayer] += 20;
-                        if (z[x] == z[x - 5]) scores[currentPlayer] += 20;
-                    }
-                    else if (x == 0) // top left
-                    {
-                        if (z[x] == z[x + 7]) scores[currentPlayer] += 20;
-                    }
-                    else if (x == 5) // top right
-                    {
-                        if (z[x] == z[x + 5]) scores[currentPlayer] += 20;
-                    }
-                    else if (x == 30) // bottom left
-                    {
-                        if (z[x] == z[x - 5]) scores[currentPlayer] += 20;
-                    }
-                    else if (x == 35) // bottom right
-                    {
-                        if (z[x] == z[x - 7]) scores[currentPlayer] += 20;
-                    }
+                    int diagPoints = CalculateDiagonalPoints(z, x, currentPlayer);
+                    scores[currentPlayer] += diagPoints;
 
-                    // PREMIA punktowa
                     if (bonuses[currentPlayer] == 0)
                     {
-                        for (int ii = 0; ii < 36; ii++)
+                        if (CheckNewTripletBonus(z, currentPlayer))
                         {
-                            if ((ii > 6 && ii < 11) || (ii > 12 && ii < 17) || (ii > 18 && ii < 23) || (ii > 24 && ii < 29)) // center
-                            {
-                                if ((z[ii - 1] == currentPlayer && z[ii] == currentPlayer && z[ii + 1] == currentPlayer) || (z[ii - 6] == currentPlayer && z[ii] == currentPlayer && z[ii + 6] == currentPlayer))
-                                {
-                                    scores[currentPlayer] += 30;
-                                    bonuses[currentPlayer] = 1;
-                                    break;
-                                }
-                            }
-                            else if (ii == 6 || ii == 12 || ii == 18 || ii == 24 || ii == 11 || ii == 17 || ii == 23 || ii == 29) // left and right
-                            {
-                                if (z[ii - 6] == currentPlayer && z[ii] == currentPlayer && z[ii + 6] == currentPlayer)
-                                {
-                                    scores[currentPlayer] += 30;
-                                    bonuses[currentPlayer] = 1;
-                                    break;
-                                }
-                            }
-                            else if (ii == 1 || ii == 2 || ii == 3 || ii == 4 || ii == 31 || ii == 32 || ii == 33 || ii == 34) // top and bottom
-                            {
-                                if (z[ii - 1] == currentPlayer && z[ii] == currentPlayer && z[ii + 1] == currentPlayer)
-                                {
-                                    scores[currentPlayer] += 30;
-                                    bonuses[currentPlayer] = 1;
-                                    break;
-                                }
-                            }
+                            scores[currentPlayer] += 30;
+                            bonuses[currentPlayer] = 1;
                         }
                     }
+
+                    UpdateUI();
+                    await AnimateCellCapture(x);
                 }
                 else
                 {
@@ -488,6 +455,11 @@ namespace CrazyNumbers
 
             CheckEndGame();
             UpdateUI();
+
+            if (!GameOverOverlay.IsVisible && _isVsCpu && currentPlayer == 2)
+            {
+                _ = MakeCpuMoveAsync();
+            }
         }
 
         private void CheckEndGame()
@@ -526,47 +498,76 @@ namespace CrazyNumbers
                 };
                 WinnersContainer.Children.Add(winLabel);
 
-                foreach (int winnerId in winners)
+                var sortedPlayers = new List<int>();
+                for (int i = 1; i <= _players; i++)
                 {
-                    string winnerName = string.Format(AppResources.PlayerHeaderTemplate, winnerId);
-                    Color winnerColor = winnerId == 1 ? Player1Color : winnerId == 2 ? Player2Color : Player3Color;
+                    sortedPlayers.Add(i);
+                }
+                sortedPlayers.Sort((a, b) =>
+                {
+                    int scoreCompare = scores[b].CompareTo(scores[a]);
+                    if (scoreCompare != 0) return scoreCompare;
+                    return a.CompareTo(b);
+                });
 
-                    var winnerBorder = new Border
+                foreach (int playerId in sortedPlayers)
+                {
+                    bool isWinner = scores[playerId] == maxPoints;
+                    string playerName = (playerId == 2 && _isVsCpu) ? GetCpuName() : string.Format(AppResources.PlayerHeaderTemplate, playerId);
+                    Color playerColor = playerId == 1 ? Player1Color : playerId == 2 ? Player2Color : Player3Color;
+
+                    var rowGrid = new Grid
                     {
-                        Stroke = winnerColor,
-                        StrokeThickness = 1.5,
-                        BackgroundColor = Color.FromArgb("#15ffffff"),
+                        ColumnDefinitions = new ColumnDefinitionCollection
+                        {
+                            new ColumnDefinition { Width = GridLength.Star },
+                            new ColumnDefinition { Width = GridLength.Auto }
+                        },
+                        VerticalOptions = LayoutOptions.Center,
+                        WidthRequest = 220
+                    };
+
+                    var nameLabel = new Label
+                    {
+                        Text = isWinner ? $"👑 {playerName.ToUpper()}" : playerName.ToUpper(),
+                        TextColor = playerColor,
+                        FontSize = isWinner ? 18 : 16,
+                        FontAttributes = isWinner ? FontAttributes.Bold : FontAttributes.None,
+                        VerticalOptions = LayoutOptions.Center,
+                        HorizontalOptions = LayoutOptions.Start
+                    };
+
+                    var scoreLabel = new Label
+                    {
+                        Text = $"{scores[playerId]} {AppResources.Pts}",
+                        TextColor = isWinner ? Colors.White : Color.FromArgb("#d0d0d0"),
+                        FontSize = isWinner ? 16 : 15,
+                        FontAttributes = isWinner ? FontAttributes.Bold : FontAttributes.None,
+                        VerticalOptions = LayoutOptions.Center,
+                        HorizontalOptions = LayoutOptions.End
+                    };
+
+                    Grid.SetColumn(nameLabel, 0);
+                    Grid.SetColumn(scoreLabel, 1);
+
+                    rowGrid.Children.Add(nameLabel);
+                    rowGrid.Children.Add(scoreLabel);
+
+                    var playerBorder = new Border
+                    {
+                        Stroke = isWinner ? playerColor : Color.FromArgb("#44ffffff"),
+                        StrokeThickness = isWinner ? 2 : 1,
+                        BackgroundColor = isWinner ? Color.FromArgb("#25ffffff") : Color.FromArgb("#10ffffff"),
                         StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle
                         {
                             CornerRadius = new CornerRadius(10)
                         },
                         Padding = new Thickness(15, 8),
                         HorizontalOptions = LayoutOptions.Center,
-                        Content = new HorizontalStackLayout
-                        {
-                            Spacing = 10,
-                            VerticalOptions = LayoutOptions.Center,
-                            Children =
-                            {
-                                new Label
-                                {
-                                    Text = winnerName.ToUpper(),
-                                    TextColor = winnerColor,
-                                    FontSize = 18,
-                                    FontAttributes = FontAttributes.Bold,
-                                    VerticalOptions = LayoutOptions.Center
-                                },
-                                new Label
-                                {
-                                    Text = $"{scores[winnerId]} {AppResources.Pts}",
-                                    TextColor = Colors.White,
-                                    FontSize = 16,
-                                    VerticalOptions = LayoutOptions.Center
-                                }
-                            }
-                        }
+                        Content = rowGrid
                     };
-                    WinnersContainer.Children.Add(winnerBorder);
+
+                    WinnersContainer.Children.Add(playerBorder);
                 }
 
                 GameOverOverlay.IsVisible = true;
@@ -600,6 +601,403 @@ namespace CrazyNumbers
 
             Dispatcher.Dispatch(async () => await HandleBackAction());
             return true;
+        }
+
+        private int CalculateDiagonalPoints(int[] board, int x, int player)
+        {
+            int points = 0;
+            if ((x > 6 && x < 11) || (x > 12 && x < 17) || (x > 18 && x < 23) || (x > 24 && x < 29)) // center
+            {
+                if (board[x - 7] == player) points += 20;
+                if (board[x + 7] == player) points += 20;
+                if (board[x - 5] == player) points += 20;
+                if (board[x + 5] == player) points += 20;
+            }
+            else if (x == 6 || x == 12 || x == 18 || x == 24) // left
+            {
+                if (board[x + 7] == player) points += 20;
+                if (board[x - 5] == player) points += 20;
+            }
+            else if (x == 11 || x == 17 || x == 23 || x == 29) // right
+            {
+                if (board[x - 7] == player) points += 20;
+                if (board[x + 5] == player) points += 20;
+            }
+            else if (x == 1 || x == 2 || x == 3 || x == 4) // top
+            {
+                if (board[x + 7] == player) points += 20;
+                if (board[x + 5] == player) points += 20;
+            }
+            else if (x == 31 || x == 32 || x == 33 || x == 34) // bottom
+            {
+                if (board[x - 7] == player) points += 20;
+                if (board[x - 5] == player) points += 20;
+            }
+            else if (x == 0) // top left
+            {
+                if (board[x + 7] == player) points += 20;
+            }
+            else if (x == 5) // top right
+            {
+                if (board[x + 5] == player) points += 20;
+            }
+            else if (x == 30) // bottom left
+            {
+                if (board[x - 5] == player) points += 20;
+            }
+            else if (x == 35) // bottom right
+            {
+                if (board[x - 7] == player) points += 20;
+            }
+            return points;
+        }
+
+        private bool CheckNewTripletBonus(int[] board, int player)
+        {
+            for (int ii = 0; ii < 36; ii++)
+            {
+                if ((ii > 6 && ii < 11) || (ii > 12 && ii < 17) || (ii > 18 && ii < 23) || (ii > 24 && ii < 29)) // center
+                {
+                    if ((board[ii - 1] == player && board[ii] == player && board[ii + 1] == player) || 
+                        (board[ii - 6] == player && board[ii] == player && board[ii + 6] == player))
+                    {
+                        return true;
+                    }
+                }
+                else if (ii == 6 || ii == 12 || ii == 18 || ii == 24 || ii == 11 || ii == 17 || ii == 23 || ii == 29) // left and right
+                {
+                    if (board[ii - 6] == player && board[ii] == player && board[ii + 6] == player)
+                    {
+                        return true;
+                    }
+                }
+                else if (ii == 1 || ii == 2 || ii == 3 || ii == 4 || ii == 31 || ii == 32 || ii == 33 || ii == 34) // top and bottom
+                {
+                    if (board[ii - 1] == player && board[ii] == player && board[ii + 1] == player)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private async Task MakeCpuMoveAsync()
+        {
+            if (_isCpuTurnRunning || GameOverOverlay.IsVisible) return;
+            _isCpuTurnRunning = true;
+
+            try
+            {
+                TipLbl.Text = AppResources.CpuTurnTip;
+                await Task.Delay(600);
+
+                if (GameOverOverlay.IsVisible) return;
+
+                int selectedFactor = CalculateBestCpuFactor();
+                number2 = selectedFactor;
+
+                UpdateUI();
+                await Task.Delay(600);
+
+                if (GameOverOverlay.IsVisible) return;
+
+                int targetProduct = number1 * number2;
+                int x = Array.IndexOf(p, targetProduct);
+
+                if (x >= 0 && x < 36)
+                {
+                    if (z[x] == 0)
+                    {
+                        z[x] = 2; // CPU is Player 2
+
+                        int diagPoints = CalculateDiagonalPoints(z, x, 2);
+                        scores[2] += diagPoints;
+
+                        if (bonuses[2] == 0)
+                        {
+                            if (CheckNewTripletBonus(z, 2))
+                            {
+                                scores[2] += 30;
+                                bonuses[2] = 1;
+                            }
+                        }
+                    }
+                }
+
+                number1 = number2;
+                number2 = 0;
+
+                currentPlayer++;
+                if (currentPlayer > _players) currentPlayer = 1;
+
+                CheckEndGame();
+                UpdateUI();
+
+                if (x >= 0 && x < 36)
+                {
+                    await AnimateCellCapture(x);
+                }
+            }
+            finally
+            {
+                _isCpuTurnRunning = false;
+            }
+        }
+
+        private int CalculateBestCpuFactor()
+        {
+            var rnd = new Random();
+
+            switch (_cpuDifficulty)
+            {
+                case CpuDifficulty.Easy:
+                    return CalculateEasyCpuFactor(rnd);
+
+                case CpuDifficulty.Hard:
+                    return CalculateHardCpuFactor(rnd);
+
+                case CpuDifficulty.Medium:
+                default:
+                    return CalculateMediumCpuFactor(rnd);
+            }
+        }
+
+        private int CalculateEasyCpuFactor(Random rnd)
+        {
+            // Easy AI: 45% chance to play randomly from valid factor choices
+            var validFactors = new List<int>();
+            for (int f = 1; f <= 9; f++)
+            {
+                int targetProduct = number1 * f;
+                int x = Array.IndexOf(p, targetProduct);
+                if (x >= 0 && x < 36 && z[x] == 0)
+                {
+                    validFactors.Add(f);
+                }
+            }
+
+            if (validFactors.Count > 0 && rnd.NextDouble() < 0.45)
+            {
+                return validFactors[rnd.Next(validFactors.Count)];
+            }
+
+            // Otherwise, simple greedy evaluation (immediate CPU points only, ignoring blocks & lookahead)
+            var candidates = new List<(int factor, int evalScore)>();
+            for (int f = 1; f <= 9; f++)
+            {
+                int targetProduct = number1 * f;
+                int x = Array.IndexOf(p, targetProduct);
+                if (x < 0 || x >= 36) continue;
+
+                if (z[x] != 0)
+                {
+                    candidates.Add((f, -1000));
+                    continue;
+                }
+
+                int evalScore = 10;
+                evalScore += CalculateDiagonalPoints(z, x, 2);
+                if (bonuses[2] == 0)
+                {
+                    int[] tempBoard = (int[])z.Clone();
+                    tempBoard[x] = 2;
+                    if (CheckNewTripletBonus(tempBoard, 2)) evalScore += 30;
+                }
+
+                candidates.Add((f, evalScore));
+            }
+
+            int maxScore = int.MinValue;
+            foreach (var c in candidates) if (c.evalScore > maxScore) maxScore = c.evalScore;
+
+            var topFactors = new List<int>();
+            foreach (var c in candidates) if (c.evalScore == maxScore) topFactors.Add(c.factor);
+
+            return topFactors.Count > 0 ? topFactors[rnd.Next(topFactors.Count)] : rnd.Next(1, 10);
+        }
+
+        private int CalculateMediumCpuFactor(Random rnd)
+        {
+            var candidates = new List<(int factor, int evalScore)>();
+
+            for (int f = 1; f <= 9; f++)
+            {
+                int targetProduct = number1 * f;
+                int x = Array.IndexOf(p, targetProduct);
+
+                if (x < 0 || x >= 36) continue;
+
+                if (z[x] != 0)
+                {
+                    // Cell is already taken. Selecting this factor loses turn.
+                    candidates.Add((f, -1000));
+                    continue;
+                }
+
+                int evalScore = 10;
+
+                // 1. Offense: Immediate diagonal points
+                int diagPoints = CalculateDiagonalPoints(z, x, 2);
+                evalScore += diagPoints * 2;
+
+                // 2. Offense: Immediate triplet bonus
+                if (bonuses[2] == 0)
+                {
+                    int[] tempBoard = (int[])z.Clone();
+                    tempBoard[x] = 2;
+                    if (CheckNewTripletBonus(tempBoard, 2))
+                    {
+                        evalScore += 45;
+                    }
+                }
+
+                // 3. Defense: Block opponent (Player 1) from completing a diagonal or triplet at cell x
+                int oppDiagPoints = CalculateDiagonalPoints(z, x, 1);
+                evalScore += oppDiagPoints * 2;
+
+                if (bonuses[1] == 0)
+                {
+                    int[] tempBoardOpp = (int[])z.Clone();
+                    tempBoardOpp[x] = 1;
+                    if (CheckNewTripletBonus(tempBoardOpp, 1))
+                    {
+                        evalScore += 35;
+                    }
+                }
+
+                // 4. Lookahead: Check max opponent gain if number1 becomes `f`
+                int maxOpponentPotentialGain = 0;
+                for (int oppF = 1; oppF <= 9; oppF++)
+                {
+                    int oppProduct = f * oppF;
+                    int oppX = Array.IndexOf(p, oppProduct);
+                    if (oppX >= 0 && oppX < 36 && z[oppX] == 0)
+                    {
+                        int oppGain = CalculateDiagonalPoints(z, oppX, 1);
+                        if (bonuses[1] == 0)
+                        {
+                            int[] tempOpp = (int[])z.Clone();
+                            tempOpp[oppX] = 1;
+                            if (CheckNewTripletBonus(tempOpp, 1)) oppGain += 30;
+                        }
+                        if (oppGain > maxOpponentPotentialGain)
+                        {
+                            maxOpponentPotentialGain = oppGain;
+                        }
+                    }
+                }
+
+                evalScore -= (int)(maxOpponentPotentialGain * 0.7);
+
+                candidates.Add((f, evalScore));
+            }
+
+            int maxScore = int.MinValue;
+            foreach (var c in candidates) if (c.evalScore > maxScore) maxScore = c.evalScore;
+
+            var topFactors = new List<int>();
+            foreach (var c in candidates) if (c.evalScore == maxScore) topFactors.Add(c.factor);
+
+            return topFactors.Count > 0 ? topFactors[rnd.Next(topFactors.Count)] : rnd.Next(1, 10);
+        }
+
+        private int CalculateHardCpuFactor(Random rnd)
+        {
+            var candidates = new List<(int factor, int evalScore)>();
+
+            for (int f = 1; f <= 9; f++)
+            {
+                int targetProduct = number1 * f;
+                int x = Array.IndexOf(p, targetProduct);
+
+                if (x < 0 || x >= 36) continue;
+
+                if (z[x] != 0)
+                {
+                    candidates.Add((f, -2000));
+                    continue;
+                }
+
+                int evalScore = 15;
+
+                // 1. Offense: Immediate diagonal points (weighted 2.5x)
+                int diagPoints = CalculateDiagonalPoints(z, x, 2);
+                evalScore += (int)(diagPoints * 2.5);
+
+                // 2. Offense: Immediate triplet bonus (60 pts)
+                if (bonuses[2] == 0)
+                {
+                    int[] tempBoard = (int[])z.Clone();
+                    tempBoard[x] = 2;
+                    if (CheckNewTripletBonus(tempBoard, 2))
+                    {
+                        evalScore += 60;
+                    }
+                }
+
+                // 3. Defense: Critical opponent blocks (weighted 3.5x for diagonals, 50 pts for triplet block)
+                int oppDiagPoints = CalculateDiagonalPoints(z, x, 1);
+                evalScore += (int)(oppDiagPoints * 3.5);
+
+                if (bonuses[1] == 0)
+                {
+                    int[] tempBoardOpp = (int[])z.Clone();
+                    tempBoardOpp[x] = 1;
+                    if (CheckNewTripletBonus(tempBoardOpp, 1))
+                    {
+                        evalScore += 50;
+                    }
+                }
+
+                // 4. Tactical Setup Heuristic: Count potential CPU connection paths opened by cell x
+                int[] futureBoard = (int[])z.Clone();
+                futureBoard[x] = 2;
+                int futureSetupCount = 0;
+                int[] neighbors = new int[] { x - 7, x + 7, x - 5, x + 5, x - 6, x + 6, x - 1, x + 1 };
+                foreach (int n in neighbors)
+                {
+                    if (n >= 0 && n < 36 && futureBoard[n] == 2)
+                    {
+                        futureSetupCount++;
+                    }
+                }
+                evalScore += futureSetupCount * 12;
+
+                // 5. Heavy Lookahead Penalty: Penalize factors that hand opponent big scoring opportunities
+                int maxOpponentPotentialGain = 0;
+                for (int oppF = 1; oppF <= 9; oppF++)
+                {
+                    int oppProduct = f * oppF;
+                    int oppX = Array.IndexOf(p, oppProduct);
+                    if (oppX >= 0 && oppX < 36 && z[oppX] == 0)
+                    {
+                        int oppGain = CalculateDiagonalPoints(z, oppX, 1);
+                        if (bonuses[1] == 0)
+                        {
+                            int[] tempOpp = (int[])z.Clone();
+                            tempOpp[oppX] = 1;
+                            if (CheckNewTripletBonus(tempOpp, 1)) oppGain += 30;
+                        }
+                        if (oppGain > maxOpponentPotentialGain)
+                        {
+                            maxOpponentPotentialGain = oppGain;
+                        }
+                    }
+                }
+
+                evalScore -= (int)(maxOpponentPotentialGain * 1.3);
+
+                candidates.Add((f, evalScore));
+            }
+
+            int maxScore = int.MinValue;
+            foreach (var c in candidates) if (c.evalScore > maxScore) maxScore = c.evalScore;
+
+            var topFactors = new List<int>();
+            foreach (var c in candidates) if (c.evalScore == maxScore) topFactors.Add(c.factor);
+
+            return topFactors.Count > 0 ? topFactors[rnd.Next(topFactors.Count)] : rnd.Next(1, 10);
         }
     }
 }

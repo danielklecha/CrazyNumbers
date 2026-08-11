@@ -11,16 +11,21 @@ namespace CrazyNumbers
         private Button? _selectedButton;
 
         private int _selectedPlayers = 3;
+        private bool _isVsCpu = false;
         private Button? _selectedPlayerButton;
+
+        private CpuDifficulty _selectedCpuDifficulty = CpuDifficulty.Medium;
+        private Button? _selectedCpuDifficultyButton;
 
         public SetupPage()
         {
             InitializeComponent();
             
-            // Pre-select default values: 3 players and 5 rounds
+            // Pre-select default values: 3 players, Medium CPU difficulty, and 5 rounds
             Microsoft.Maui.Controls.Device.BeginInvokeOnMainThread(() =>
             {
                 SelectPlayerButton(ThreePlayersBtn);
+                SelectCpuDifficultyButton(MediumDifficultyBtn);
 
                 foreach (var child in RoundsGrid.Children)
                 {
@@ -60,16 +65,64 @@ namespace CrazyNumbers
             _selectedPlayerButton.TextColor = Color.FromArgb("#0B0F19");
             _selectedPlayerButton.BorderColor = Colors.Transparent;
 
-            if (btn == TwoPlayersBtn)
+            if (btn == OnePlayerBtn)
             {
+                _isVsCpu = true;
+                _selectedPlayers = 2;
+            }
+            else if (btn == TwoPlayersBtn)
+            {
+                _isVsCpu = false;
                 _selectedPlayers = 2;
             }
             else if (btn == ThreePlayersBtn)
             {
+                _isVsCpu = false;
                 _selectedPlayers = 3;
             }
 
+            if (CpuDifficultyContainer != null)
+            {
+                CpuDifficultyContainer.IsVisible = _isVsCpu;
+            }
+
             UpdateRoundsDescription();
+        }
+
+        private void OnCpuDifficultySelected(object sender, EventArgs e)
+        {
+            if (sender is Button btn)
+            {
+                SelectCpuDifficultyButton(btn);
+            }
+        }
+
+        private void SelectCpuDifficultyButton(Button btn)
+        {
+            if (_selectedCpuDifficultyButton != null)
+            {
+                _selectedCpuDifficultyButton.BackgroundColor = Color.FromArgb("#15ffffff");
+                _selectedCpuDifficultyButton.TextColor = Colors.White;
+                _selectedCpuDifficultyButton.BorderColor = Color.FromArgb("#33ffffff");
+            }
+
+            _selectedCpuDifficultyButton = btn;
+            _selectedCpuDifficultyButton.BackgroundColor = Color.FromArgb("#00e5ff");
+            _selectedCpuDifficultyButton.TextColor = Color.FromArgb("#0B0F19");
+            _selectedCpuDifficultyButton.BorderColor = Colors.Transparent;
+
+            if (btn == EasyDifficultyBtn)
+            {
+                _selectedCpuDifficulty = CpuDifficulty.Easy;
+            }
+            else if (btn == MediumDifficultyBtn)
+            {
+                _selectedCpuDifficulty = CpuDifficulty.Medium;
+            }
+            else if (btn == HardDifficultyBtn)
+            {
+                _selectedCpuDifficulty = CpuDifficulty.Hard;
+            }
         }
 
         private void UpdateRoundsDescription()
@@ -120,7 +173,7 @@ namespace CrazyNumbers
         {
             ShowLoading();
             await System.Threading.Tasks.Task.Delay(50); // Yield to allow spinner rendering
-            await Navigation.PushAsync(new GamePage(_selectedRounds, _selectedPlayers));
+            await Navigation.PushAsync(new GamePage(_selectedRounds, _selectedPlayers, _isVsCpu, _selectedCpuDifficulty));
         }
 
         private void ShowLoading()
