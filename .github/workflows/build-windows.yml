@@ -39,7 +39,7 @@ jobs:
           Copy-Item CrazyNumbers-Windows.zip -Destination windows-artifacts/
 
       - name: Upload Windows Artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: windows-assets
           path: windows-artifacts/*

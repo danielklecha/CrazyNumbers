@@ -66,7 +66,7 @@ jobs:
           cp CrazyNumbers-Android-Symbols.zip android-artifacts/
 
       - name: Upload Android Artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: android-assets
           path: android-artifacts/*
