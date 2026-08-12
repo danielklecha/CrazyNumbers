@@ -10,8 +10,8 @@ namespace CrazyNumbers
         private int _selectedRounds = 5;
         private Button? _selectedButton;
 
-        private int _selectedPlayers = 3;
-        private bool _isVsCpu = false;
+        private int _selectedPlayers = 2;
+        private bool _isVsCpu = true;
         private Button? _selectedPlayerButton;
 
         private CpuDifficulty _selectedCpuDifficulty = CpuDifficulty.Medium;
@@ -21,10 +21,10 @@ namespace CrazyNumbers
         {
             InitializeComponent();
             
-            // Pre-select default values: 3 players, Medium CPU difficulty, and 5 rounds
-            Microsoft.Maui.Controls.Device.BeginInvokeOnMainThread(() =>
+            // Pre-select default values: 1 player, Medium CPU difficulty, and 5 rounds
+            Dispatcher.Dispatch(() =>
             {
-                SelectPlayerButton(ThreePlayersBtn);
+                SelectPlayerButton(OnePlayerBtn);
                 SelectCpuDifficultyButton(MediumDifficultyBtn);
 
                 foreach (var child in RoundsGrid.Children)
@@ -38,12 +38,12 @@ namespace CrazyNumbers
             });
         }
 
-        private async void OnBackClicked(object sender, EventArgs e)
+        private async void OnBackClicked(object? sender, EventArgs e)
         {
             await Navigation.PopAsync();
         }
 
-        private void OnPlayerCountSelected(object sender, EventArgs e)
+        private void OnPlayerCountSelected(object? sender, EventArgs e)
         {
             if (sender is Button btn)
             {
@@ -89,7 +89,7 @@ namespace CrazyNumbers
             UpdateRoundsDescription();
         }
 
-        private void OnCpuDifficultySelected(object sender, EventArgs e)
+        private void OnCpuDifficultySelected(object? sender, EventArgs e)
         {
             if (sender is Button btn)
             {
@@ -133,7 +133,7 @@ namespace CrazyNumbers
             }
         }
 
-        private void OnRoundSelected(object sender, EventArgs e)
+        private void OnRoundSelected(object? sender, EventArgs e)
         {
             if (sender is Button btn)
             {
@@ -169,7 +169,7 @@ namespace CrazyNumbers
             HideLoading();
         }
 
-        private async void OnStartClicked(object sender, EventArgs e)
+        private async void OnStartClicked(object? sender, EventArgs e)
         {
             ShowLoading();
             await System.Threading.Tasks.Task.Delay(50); // Yield to allow spinner rendering

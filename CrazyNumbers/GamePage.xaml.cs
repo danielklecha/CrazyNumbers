@@ -211,7 +211,7 @@ namespace CrazyNumbers
             HideLoading();
         }
 
-        private async void OnRulesClicked(object sender, EventArgs e)
+        private async void OnRulesClicked(object? sender, EventArgs e)
         {
             ShowLoading();
             await System.Threading.Tasks.Task.Delay(50); // Yield to allow spinner rendering
@@ -219,16 +219,16 @@ namespace CrazyNumbers
             await Navigation.PushAsync(new RulesPage());
         }
 
-        private async void OnResetClicked(object sender, EventArgs e)
+        private async void OnResetClicked(object? sender, EventArgs e)
         {
-            bool answer = await DisplayAlert(AppResources.ResetAlertTitle, AppResources.ResetAlertMessage, AppResources.Yes, AppResources.No);
+            bool answer = await DisplayAlertAsync(AppResources.ResetAlertTitle, AppResources.ResetAlertMessage, AppResources.Yes, AppResources.No);
             if (answer)
             {
                 await Navigation.PopToRootAsync();
             }
         }
 
-        private async void OnNewGameClicked(object sender, EventArgs e)
+        private async void OnNewGameClicked(object? sender, EventArgs e)
         {
             await Navigation.PopToRootAsync();
         }
@@ -358,26 +358,28 @@ namespace CrazyNumbers
             for (int i = 0; i < 36; i++)
             {
                 var border = (Border)BoardGrid.Children[i];
-                var lbl = (Label)border.Content;
-                if (z[i] == 1)
+                if (border.Content is Label lbl)
                 {
-                    border.BackgroundColor = Player1Color;
-                    lbl.TextColor = Color.FromArgb("#0B0F19");
-                }
-                else if (z[i] == 2)
-                {
-                    border.BackgroundColor = Player2Color;
-                    lbl.TextColor = Color.FromArgb("#0B0F19");
-                }
-                else if (z[i] == 3)
-                {
-                    border.BackgroundColor = Player3Color;
-                    lbl.TextColor = Color.FromArgb("#0B0F19");
-                }
-                else
-                {
-                    border.BackgroundColor = Color.FromArgb("#15ffffff");
-                    lbl.TextColor = Colors.White;
+                    if (z[i] == 1)
+                    {
+                        border.BackgroundColor = Player1Color;
+                        lbl.TextColor = Color.FromArgb("#0B0F19");
+                    }
+                    else if (z[i] == 2)
+                    {
+                        border.BackgroundColor = Player2Color;
+                        lbl.TextColor = Color.FromArgb("#0B0F19");
+                    }
+                    else if (z[i] == 3)
+                    {
+                        border.BackgroundColor = Player3Color;
+                        lbl.TextColor = Color.FromArgb("#0B0F19");
+                    }
+                    else
+                    {
+                        border.BackgroundColor = Color.FromArgb("#15ffffff");
+                        lbl.TextColor = Colors.White;
+                    }
                 }
             }
         }
@@ -389,31 +391,31 @@ namespace CrazyNumbers
             {
                 cellBorder.AnchorX = 0.5;
                 cellBorder.AnchorY = 0.5;
-                await cellBorder.ScaleTo(1.25, 140, Easing.CubicOut);
-                await cellBorder.ScaleTo(1.0, 140, Easing.CubicIn);
+                await cellBorder.ScaleToAsync(1.25, 140, Easing.CubicOut);
+                await cellBorder.ScaleToAsync(1.0, 140, Easing.CubicIn);
             }
         }
 
-        private void OnFactorTapped(object sender, EventArgs e)
+        private void OnFactorTapped(object? sender, EventArgs e)
         {
             if (_isCpuTurnRunning || (_isVsCpu && currentPlayer == 2)) return;
             if (number2 != 0) return; // already selected
 
-            var border = (Border)sender;
-            _ = border.ScaleTo(1.2, 100, Easing.CubicOut).ContinueWith(t => border.ScaleTo(1.0, 100, Easing.CubicIn));
+            var border = (Border)sender!;
+            _ = border.ScaleToAsync(1.2, 100, Easing.CubicOut).ContinueWith(t => border.ScaleToAsync(1.0, 100, Easing.CubicIn));
 
-            int factor = (int)border.BindingContext;
+            int factor = (int)border.BindingContext!;
             number2 = factor;
             UpdateUI();
         }
 
-        private async void OnGridCellTapped(object sender, EventArgs e)
+        private async void OnGridCellTapped(object? sender, EventArgs e)
         {
             if (_isCpuTurnRunning || (_isVsCpu && currentPlayer == 2)) return;
             if (number2 == 0) return; // factor 2 not selected yet
 
-            var border = (Border)sender;
-            int x = (int)border.BindingContext;
+            var border = (Border)sender!;
+            int x = (int)border.BindingContext!;
 
             if (number1 * number2 == p[x])
             {
@@ -438,13 +440,13 @@ namespace CrazyNumbers
                 }
                 else
                 {
-                    await DisplayAlert(AppResources.Oops, AppResources.CellAlreadyTakenMessage, AppResources.OK);
+                    await DisplayAlertAsync(AppResources.Oops, AppResources.CellAlreadyTakenMessage, AppResources.OK);
                     return;
                 }
             }
             else
             {
-                await DisplayAlert(AppResources.Oops, AppResources.WrongAnswerMessage, AppResources.OK);
+                await DisplayAlertAsync(AppResources.Oops, AppResources.WrongAnswerMessage, AppResources.OK);
             }
 
             number1 = number2;
@@ -585,7 +587,7 @@ namespace CrazyNumbers
 
             string title = AppResources.ResourceManager.GetString("ExitAlertTitle") ?? "Exit Game";
             string message = AppResources.ResourceManager.GetString("ExitAlertMessage") ?? "Are you sure you want to leave the game? Your progress will be lost.";
-            bool answer = await DisplayAlert(title, message, AppResources.Yes, AppResources.No);
+            bool answer = await DisplayAlertAsync(title, message, AppResources.Yes, AppResources.No);
             if (answer)
             {
                 await Navigation.PopAsync();
