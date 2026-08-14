@@ -4,7 +4,6 @@ on:
   push:
     tags:
       - 'v[0-9]*'
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -14,10 +13,14 @@ permissions:
 jobs:
   build-android:
     uses: ./.github/workflows/build-android.yml
+    with:
+      version: ${{ github.ref_name }}
     secrets: inherit
 
   build-windows:
     uses: ./.github/workflows/build-windows.yml
+    with:
+      version: ${{ github.ref_name }}
     secrets: inherit
 
   create-release:

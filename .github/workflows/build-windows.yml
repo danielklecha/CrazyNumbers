@@ -2,7 +2,18 @@ name: Build Windows
 
 on:
   workflow_call:
+    inputs:
+      version:
+        type: string
+        required: false
+        default: '1.0.0'
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g. 1.0.0 or v1.0.0)'
+        type: string
+        required: false
+        default: '1.0.0'
 
 jobs:
   build-windows:
@@ -11,6 +22,22 @@ jobs:
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v6
+
+      - name: Replace Version in csproj files
+        shell: bash
+        run: |
+          rawVersion="${{ inputs.version || github.ref_name }}"
+          if [[ -z "$rawVersion" || ! "$rawVersion" =~ ^v?[0-9] ]]; then rawVersion="1.0.0"; fi
+          tag=$(echo "$rawVersion" | sed 's/^v//')
+          IFS='.' read -r major minor patch <<< "$tag"
+          major="${major:-0}"
+          minor="${minor:-0}"
+          patch=$(echo "${patch:-0}" | grep -oE '^[0-9]+' || echo "0")
+          app_version=$(( major * 1000000 + minor * 1000 + patch ))
+          echo "Setting Version=${tag}, ApplicationDisplayVersion=${tag}, ApplicationVersion=${app_version}"
+          find . -type f -name "*.csproj" -exec sed -i "s/<Version>.*<\/Version>/<Version>${tag}<\/Version>/g" {} \;
+          find . -type f -name "*.csproj" -exec sed -i "s/<ApplicationDisplayVersion>.*<\/ApplicationDisplayVersion>/<ApplicationDisplayVersion>${tag}<\/ApplicationDisplayVersion>/g" {} \;
+          find . -type f -name "*.csproj" -exec sed -i "s/<ApplicationVersion>.*<\/ApplicationVersion>/<ApplicationVersion>${app_version}<\/ApplicationVersion>/g" {} \;
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v6
